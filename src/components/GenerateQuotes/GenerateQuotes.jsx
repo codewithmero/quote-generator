@@ -1,42 +1,36 @@
 import React, { useEffect, useState } from 'react';
-import Quotes from '../../api/Quotes';
 import './style.css';
 
 function GenerateQuotes(props) {
-  const [quotes, setQuotes] = useState([]);
-  const [printableQuote, setPrintableQuote] = useState({
-    id: 1, 
-    author: 'Fredrick Seige', 
-    quote: "The siege is lost, but the war is far from over. My castle crumbles, but my will does not. You will not distract me so easily! We are prepared, come at us, you will fail."
-  });
+  const [printableQuote, setPrintableQuote] = useState({});
 
-  const generateRandomQuote = () => {
-    const index = Math.floor(Math.random() * quotes.length);
-    setPrintableQuote(quotes[index]);
+ const loadQuotes = async () => {
+  const response = await fetch("https://animechan.vercel.app/api/random");
+  const data = await response.json();
+  if(data.quote.length > 60 && data.quote.length < 120)
+    setPrintableQuote(data);
+  else
+    loadQuotes();
  }
 
   useEffect(() => {
-    const quotes = Quotes.map(q => q);
-    setQuotes(quotes);
-
-    const index = Math.floor(Math.random() * quotes.length);
-    setPrintableQuote(quotes[index]);
+    loadQuotes();
   },[]);
 
   const handleClickCapture = event => {
     if(event.target.className === 'quote-section' || event.target.className === 'author-section') {
-      generateRandomQuote();
+      loadQuotes();
     }
   }
 
   return (
     <div className="quote-box" onClickCapture={handleClickCapture}>
       <div className="quote-section">
-        <p className="quote"><q> {printableQuote?.quote} </q></p>
+        <p className="quote"><q> {printableQuote?.quote || "Strength is the only thing that matters in this world. Everything else is just a useless delusion for the weak."} </q></p>
       </div>
 
       <div className="author-section">
-        <p>— {printableQuote?.author}</p>
+        <p>— {printableQuote?.character || "Vegeta"}</p>
       </div>
       {/* <button className="cta-btn" onClick={() => generateRandomQuote()}>Give Me Advice!</button> */}
     </div>
